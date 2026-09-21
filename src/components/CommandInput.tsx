@@ -1,10 +1,13 @@
-import { useState, KeyboardEvent } from "react";
+import { useState } from "react";
+import type { KeyboardEvent } from "react";
 
 interface CommandInputProps {
+  prompt: string;
   onCommand: (command: string) => void;
 }
 
 export default function CommandInput({
+  prompt,
   onCommand,
 }: CommandInputProps) {
   const [value, setValue] = useState("");
@@ -23,7 +26,7 @@ export default function CommandInput({
 
   return (
     <div className="command-input">
-      <span className="prompt">guest@dev:~$</span>
+      <span className="prompt">{prompt}</span>
 
       <input
         autoFocus

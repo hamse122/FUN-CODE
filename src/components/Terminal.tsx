@@ -1,31 +1,35 @@
 import { useEffect, useRef, useState } from "react";
 import CommandInput from "./CommandInput";
 import TerminalLine from "./TerminalLine";
-import { commandResponses } from "../data/commands";
+import { displayPrompt, HOME, runShell } from "../lib/shell";
 
 interface TerminalEntry {
   id: number;
+  prompt?: string;
   command?: string;
   output: string[];
 }
 
 export default function Terminal() {
+  const [cwd, setCwd] = useState(HOME);
   const [history, setHistory] = useState<TerminalEntry[]>([
     {
       id: 0,
       output: [
         "╔══════════════════════════════════════╗",
-        "║        HAMSE DEV TERMINAL            ║",
+        "║        HAMSE MO TERMINAL            ║",
         "║        System initialized...         ║",
         "╚══════════════════════════════════════╝",
         "",
         'Type "help" to see available commands.',
+        "Try:  pwd   ls   cd projects   cat about.txt",
         "",
       ],
     },
   ]);
 
   const terminalRef = useRef<HTMLDivElement>(null);
+  const prompt = displayPrompt(cwd);
 
   useEffect(() => {
     terminalRef.current?.scrollTo({
@@ -35,69 +39,27 @@ export default function Terminal() {
   }, [history]);
 
   const handleCommand = (command: string) => {
-    const normalizedCommand = command.toLowerCase();
+    const result = runShell(command, cwd);
+    const currentPrompt = displayPrompt(cwd);
 
-    if (normalizedCommand === "clear") {
+    setCwd(result.cwd);
+
+    if (result.openUrl) {
+      window.open(result.openUrl, "_blank", "noopener,noreferrer");
+    }
+
+    if (result.clear) {
       setHistory([]);
       return;
     }
-
-    if (normalizedCommand === "date") {
-      setHistory((previous) => [
-        ...previous,
-        {
-          id: Date.now(),
-          command,
-          output: [new Date().toLocaleDateString()],
-        },
-      ]);
-
-      return;
-    }
-
-    if (normalizedCommand === "time") {
-      setHistory((previous) => [
-        ...previous,
-        {
-          id: Date.now(),
-          command,
-          output: [new Date().toLocaleTimeString()],
-        },
-      ]);
-
-      return;
-    }
-
-    if (normalizedCommand === "github") {
-      setHistory((previous) => [
-        ...previous,
-        {
-          id: Date.now(),
-          command,
-          output: ["Opening GitHub..."],
-        },
-      ]);
-
-      window.open(
-        "https://github.com/hamse122",
-        "_blank",
-        "noopener,noreferrer"
-      );
-
-      return;
-    }
-
-    const response = commandResponses[normalizedCommand];
 
     setHistory((previous) => [
       ...previous,
       {
         id: Date.now(),
+        prompt: currentPrompt,
         command,
-        output: response ?? [
-          `Command not found: ${command}`,
-          'Type "help" to see available commands.',
-        ],
+        output: result.output,
       },
     ]);
   };
@@ -120,28 +82,37 @@ export default function Terminal() {
         </span>
       </div>
 
-      <div className="terminal-body" ref={terminalRef}>
-        {history.map((entry) => (
-          <div key={entry.id} className="terminal-entry">
-            {entry.command && (
-              <div className="command-history">
-                <span className="prompt">
-                  guest@dev:~$
-                </span>{" "}
-                {entry.command}
-              </div>
-            )}
+      <div className="terminal-stage">
+        <img
+          className="terminal-dragon"
+          src="/terminal-dragon.png"
+          alt=""
+          aria-hidden="true"
+        />
 
-            {entry.output.map((line, index) => (
-              <TerminalLine
-                key={`${entry.id}-${index}`}
-                text={line}
-              />
-            ))}
-          </div>
-        ))}
+        <div className="terminal-body" ref={terminalRef}>
+          {history.map((entry) => (
+            <div key={entry.id} className="terminal-entry">
+              {entry.command && (
+                <div className="command-history">
+                  <span className="prompt">
+                    {entry.prompt ?? "guest@dev:~$"}
+                  </span>{" "}
+                  {entry.command}
+                </div>
+              )}
 
-        <CommandInput onCommand={handleCommand} />
+              {entry.output.map((line, index) => (
+                <TerminalLine
+                  key={`${entry.id}-${index}`}
+                  text={line}
+                />
+              ))}
+            </div>
+          ))}
+
+          <CommandInput prompt={prompt} onCommand={handleCommand} />
+        </div>
       </div>
     </div>
   );

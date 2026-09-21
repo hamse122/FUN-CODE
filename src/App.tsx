@@ -1,5 +1,6 @@
 import Terminal from "./components/Terminal";
 import Profile from "./components/Profile";
+import PirateSkull from "./components/PirateSkull";
 
 function App() {
   return (
@@ -9,7 +10,7 @@ function App() {
       <div className="app-container">
         <header className="top-bar">
           <div className="brand">
-            <span className="brand-dot" />
+            <PirateSkull className="brand-skull" />
             HAMSE-MO
           </div>
 
@@ -27,7 +28,7 @@ function App() {
         </section>
 
         <footer>
-          <span>© 2026 HAMSE.DEV</span>
+          <span>© 2026 HAMSE.MO</span>
           <span>Built with React + TypeScript</span>
         </footer>
       </div>
