@@ -17,7 +17,7 @@ export default function Terminal() {
       id: 0,
       output: [
         "╔══════════════════════════════════════╗",
-        "║        HAMSE MO TERMINAL            ║",
+        "║        HAMSE MO TERMINAL             ║",
         "║        System initialized...         ║",
         "╚══════════════════════════════════════╝",
         "",
